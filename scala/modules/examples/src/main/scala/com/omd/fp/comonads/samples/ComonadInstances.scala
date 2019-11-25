@@ -1,8 +1,7 @@
 package com.omd.fp.comonads.samples
 
 import cats.Comonad
-import syntax._
-import instances._
+import com.omd.fp.comonads.samples.syntax._
 
 private[samples] trait ComonadInstances {
   implicit final def lazyCommonad: Comonad[LazyList] = new Comonad[LazyList] {
@@ -14,17 +13,17 @@ private[samples] trait ComonadInstances {
     override def map[A, B](fa: LazyList[A])(f: A => B): LazyList[B] = fa.map(f)
   }
 
-  implicit final def lazyListZComonad: Comonad[Zipper[LazyList, *]] = new Comonad[Zipper[LazyList, *]] {
-    override def extract[A](z: Zipper[LazyList, A]): A = z.focus
+  implicit final def lazyListZComonad[F[_]: Comonad: Zip]: Comonad[Zipper[F, *]] = new Comonad[Zipper[F, *]] {
+    override def extract[A](z: Zipper[F, A]): A = z.focus
 
-    override def coflatMap[A, B](fa: Zipper[LazyList, A])(f: Zipper[LazyList, A] => B): Zipper[LazyList, B] =
+    override def coflatMap[A, B](fa: Zipper[F, A])(f: Zipper[F, A] => B): Zipper[F, B] =
       Zipper(
-        Comonad[LazyList].coflatMap(fa.left)(l => f(l.zipper)),
+        Comonad[F].coflatMap(fa.left)(l => f(l.zipper)),
         f(fa),
-        Comonad[LazyList].coflatMap(fa.right)(l => f(l.zipper))
+        Comonad[F].coflatMap(fa.right)(l => f(l.zipper))
       )
 
-    override def map[A, B](fa: Zipper[LazyList, A])(f: A => B): Zipper[LazyList, B] =
-      Zipper(fa.left.map(f), f(fa.focus), fa.right.map(f))
+    override def map[A, B](fa: Zipper[F, A])(f: A => B): Zipper[F, B] =
+      Zipper(Comonad[F].map(fa.left)(f), f(fa.focus), Comonad[F].map(fa.right)(f))
   }
 }
