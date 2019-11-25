@@ -81,10 +81,9 @@ lazy val commonSettings = Seq(
     Resolver.sonatypeRepo("snapshots"),
     "confluent" at "https://packages.confluent.io/maven/"
   ),
-
-  coverageEnabled := true,
-    coverageMinimum := 80,
-coverageFailOnMinimum := false
+  coverageEnabled       := true,
+  coverageMinimum       := 80,
+  coverageFailOnMinimum := false
 )
 
 lazy val conway = project
